@@ -1,0 +1,50 @@
+version: '2'
+services:
+  php:
+    image: yiisoftware/yii2-php:7.4-apache
+    volumes:
+      - ~/.composer-docker/cache:/root/.composer/cache:delegated
+      - ./:/app:delegated
+      - assets:/app/web/assets
+      - runtime:/app/runtime
+    ports:
+      - '8000:80'
+    depends_on:
+      -  mysql4
+      -  test_mysql
+    command: ['bash', '/app/docker-php-init.sh']
+  mysql4:
+    image: mysql:5.7
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=mysql
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=user
+    ports:
+      - 33060:3306
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    depends_on:
+      - mysql4
+    links:
+      - mysql4
+    ports:
+      - 8080:80
+    environment:
+      PMA_ARBITRARY: 1
+  test_mysql:
+    image: mysql:5.7
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=test_db
+      - MYSQL_USER=test_user
+      - MYSQL_PASSWORD=test
+    ports:
+      - 33061:3306
+volumes:
+  assets:
+  runtime:
+  test_db_data: 
